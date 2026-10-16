@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Calculator</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #141e30, #243b55);
+        }
+
+        .calculator {
+            width: 340px;
+            padding: 22px;
+            background: #1c1c1c;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px #0006;
+        }
+
+        h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        #display {
+            width: 100%;
+            height: 75px;
+            margin-bottom: 18px;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #303030;
+            color: white;
+            font-size: 30px;
+            text-align: right;
+            outline: none;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            height: 58px;
+            border: none;
+            border-radius: 12px;
+            background: #383838;
+            color: white;
+            font-size: 21px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            filter: brightness(1.3);
+        }
+
+        .operator {
+            background: #ff9500;
+        }
+
+        .utility {
+            background: #777;
+        }
+
+        .equals {
+            background: #16a085;
+        }
+
+        .zero {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="calculator">
+        <h2>Online Calculator</h2>
+
+        <input
+            type="text"
+            id="display"
+            value="0"
+            readonly
+            aria-label="Calculator display"
+        >
+
+        <div class="buttons">
+            <button class="utility" onclick="clearDisplay()">AC</button>
+            <button class="utility" onclick="deleteLast()">DEL</button>
+            <button class="utility" onclick="addValue('%')">%</button>
+            <button class="operator" onclick="addValue('/')">÷</button>
+
+            <button onclick="addValue('7')">7</button>
+            <button onclick="addValue('8')">8</button>
+            <button onclick="addValue('9')">9</button>
+            <button class="operator" onclick="addValue('*')">×</button>
+
+            <button onclick="addValue('4')">4</button>
+            <button onclick="addValue('5')">5</button>
+            <button onclick="addValue('6')">6</button>
+            <button class="operator" onclick="addValue('-')">−</button>
+
+            <button onclick="addValue('1')">1</button>
+            <button onclick="addValue('2')">2</button>
+            <button onclick="addValue('3')">3</button>
+            <button class="operator" onclick="addValue('+')">+</button>
+
+            <button class="zero" onclick="addValue('0')">0</button>
+            <button onclick="addValue('.')">.</button>
+            <button class="equals" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById("display");
+        let expression = "";
+
+        function updateDisplay() {
+            display.value = expression || "0";
+        }
+
+        function addValue(value) {
+            if (expression === "Error") {
+                expression = "";
+            }
+
+            expression += value;
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            expression = "";
+            updateDisplay();
+        }
+
+        function deleteLast() {
+            expression = expression.slice(0, -1);
+            updateDisplay();
+        }
+
+        function calculate() {
+            try {
+                // Allow only calculator characters.
+                if (!/^[0-9+\-*/%.()\s]+$/.test(expression)) {
+                    throw new Error("Invalid input");
+                }
+
+                // Evaluate the mathematical expression.
+                const result = Function(
+                    '"use strict"; return (' + expression + ')'
+                )();
+
+                if (!Number.isFinite(result)) {
+                    throw new Error("Invalid result");
+                }
+
+                expression = String(
+                    Math.round((result + Number.EPSILON) * 1e10) / 1e10
+                );
+
+                updateDisplay();
+            } catch {
+                expression = "Error";
+                updateDisplay();
+            }
+        }
+
+        // Support keyboard input.
+        document.addEventListener("keydown", function(event) {
+            if (/^[0-9+\-*/%.()]$/.test(event.key)) {
+                addValue(event.key);
+            } else if (event.key === "Enter" || event.key === "=") {
+                calculate();
+            } else if (event.key === "Backspace") {
+                deleteLast();
+            } else if (event.key === "Escape") {
+                clearDisplay();
+            }
+        });
+    </script>
+</body>
+</html>
